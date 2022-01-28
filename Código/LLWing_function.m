@@ -1,4 +1,4 @@
-function [CM_cg_matrix, force_coeff, k1, CD0] = LLWing_function(DE_flap)
+function [CM_cg_matrix, force_coeff, k1, CD0] = LLWing_function(DE_flap,N, BreakCl)
 
 % -------------------------------------------------------------------------     
 % PROGRAM LLWING: Weissinger lifting-line method for trapezoidal wings
@@ -25,10 +25,10 @@ inc = 0*pi/180; % fuselage inclination
 %C_R = 1.55; % wing root chord
 AR = 21.3 ;   % aspect ratio (AR = span^2/S_alar)
 TR = 1/5.55;   % taper ratio (lambda = C_T/C_R)
-DE25 = 15.5; % sweep angle at c/4 (deg) (LAMBDA)
+DE25 = 15; % sweep angle at c/4 (deg) (LAMBDA)
 span = 20; % wing span [m]
 
-ETIP = -6.2; % tip twist (deg, negative for washout)
+ETIP = -5.25; % tip twist (deg, negative for washout)
 
 % -------------------------------------------------------------------------
 %% AIRFOIL DATA EXTRACTION
@@ -48,7 +48,7 @@ CF_ratio = 0.2;  % flap_chord/chord ratio
 FlapCorr = 0.8; % flap effectiviness (<=1)
 
 % Simulation data (by the time being only longitudinal analysis)
-N = 100 ; % number of panels along the span
+%N = 100 ; % number of panels along the span
 ALPHA = [ -10. -8.0 -4.0 0. 4.0 8.0 10. ] ; % angles of attack for analysis (deg)
 
 
@@ -73,9 +73,10 @@ ALPHA = [ -10. -8.0 -4.0 0. 4.0 8.0 10. ] ; % angles of attack for analysis (deg
 [C_MF_adim, C_MF_2_adim, C_D0_adim] = fuselage_parameters(rho_inf, U_inf, k, l_f, r, S, mac, span, ALPHA, inc);
 
 %% Coefficient parametres
-[alpha_l0, cl_alpha, mom_slope, x_ac, CM0, CLa, CD0, k1, mean_CM_cg, CM_cg_matrix, CL_trim, CL_stall, v_stall, margin_stab] = coeff_parameters(ALPHA, force_coeff, cl_local, S, span, mac, C_MF_2_adim, C_D0_adim, rho_inf);
+[alpha_l0, cl_alpha, mom_slope, x_ac, CM0, CLa, CD0, k1, mean_CM_cg, CM_cg_matrix, CL_trim, CL_stall, v_stall, margin_stab] = coeff_parameters(ALPHA, force_coeff, cl_local, S, span, mac, C_MF_2_adim, C_D0_adim, rho_inf, BreakCl);
 
-close Figure 1 Figure 2 Figure 3 Figure 4 Figure 5 Figure 6 Figure 7 Figure 8
+close Figure 1 Figure 2 
+%Figure 3 Figure 4 Figure 5 Figure 6 Figure 7 Figure 8
 
 
 end

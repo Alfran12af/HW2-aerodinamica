@@ -4,7 +4,7 @@
 % / in both cases                                           /
 % ///////////////////////////////////////////////////////////
 
-function [alpha_l0, cl_alpha, mom_slope, x_ac, CM0, CLa, CD0, k1, mean_CM_cg, CM_cg_matrix, CL_trim, CL_stall, v_stall, margin_stab] = coeff_parameters(ALPHA, force_coeff, cl_local, S, span, mac, C_MF_2_adim, C_D0_adim, rho_inf)
+function [alpha_l0, cl_alpha, mom_slope, x_ac, CM0, CLa, CD0, k1, mean_CM_cg, CM_cg_matrix, CL_trim, CL_stall, v_stall, margin_stab] = coeff_parameters(ALPHA, force_coeff, cl_local, S, span, mac, C_MF_2_adim, C_D0_adim, rho_inf, BreakCl)
 
 % set color for plots
 str1 = '#77AC30';
@@ -29,17 +29,33 @@ lin_reg = polyfit(ALPHA(1,:), Cl_matrix(1,:), 1); % wing regression line
 cl_alpha = lin_reg(1,1);
 alpha_l0 = -lin_reg(1,2)/lin_reg(1,1);
 
+if BreakCl==1
+    cl_alpha = 0; 
+    mom_slope = 0; 
+    x_ac = 0; 
+    CM0 = 0; 
+    CLa = 0; 
+    CD0 = 0; 
+    k1 = 0; 
+    mean_CM_cg = 0; 
+    CM_cg_matrix = 0; 
+    CL_trim = 0; 
+    CL_stall = 0; 
+    v_stall = 0; 
+    margin_stab = 0;
+    return
+end 
 figure
 hold on
-title('Regression line for $C_l$ as a function of $\alpha$', 'Interpreter','latex', FontSize=16)
-plot(ALPHA(1,:), Cl_matrix(1,:), 'Color', yellow, LineWidth=1.2)
-plot(ALPHA(1,:), Cl_matrix(1,:), 'bo', MarkerSize=8)
+title('Regression line for $C_l$ as a function of $\alpha$', 'Interpreter','latex', 'FontSize',16)
+plot(ALPHA(1,:), Cl_matrix(1,:), 'Color', yellow, 'LineWidth',1.2)
+plot(ALPHA(1,:), Cl_matrix(1,:), 'bo', 'MarkerSize',8)
 % plot(ALPHA, yfit, LineWidth=1.2)
 plot(alpha_l0, 0, 'r*')
 grid on
 grid minor
-xlabel('$\alpha$ (deg.)', 'Interpreter','latex', FontSize=15)
-ylabel('$C_l$', 'Interpreter','latex', FontSize=15)
+xlabel('$\alpha$ (deg.)', 'Interpreter','latex', 'FontSize',15)
+ylabel('$C_l$', 'Interpreter','latex', 'FontSize',15)
 hold off
 
 
@@ -56,16 +72,17 @@ mom_slope = mom_lin_reg(1,1);
 x_ac  = -mom_lin_reg(1,1)*mac*span; % compute the real x_ac from the leadin edge
 CM0 = force_coeff(5,:)+force_coeff(7,:)*x_ac;
 
+
 figure
 hold on
-title('Regression line for $C_{M_{LE}}$ as a function of $C_L$', 'Interpreter', 'latex', FontSize=16)
-plot(Cl_matrix(1,:), CM_tot(:), 'Color', red, LineWidth=1.2)
-plot(Cl_matrix(1,:), CM_tot(:), 'bo', MarkerSize=8)
+title('Regression line for $C_{M_{LE}}$ as a function of $C_L$', 'Interpreter', 'latex', 'FontSize',16)
+plot(Cl_matrix(1,:), CM_tot(:), 'Color', red, 'LineWidth',1.2)
+plot(Cl_matrix(1,:), CM_tot(:), 'bo', 'MarkerSize',8)
 %plot(0, CM0, 'r*')
 grid on
 grid minor
-xlabel('$C_L$', 'Interpreter','latex', FontSize=15)
-ylabel('$C_{M_{LE}}$', 'Interpreter','latex', FontSize=15)
+xlabel('$C_L$', 'Interpreter','latex', 'FontSize',15)
+ylabel('$C_{M_{LE}}$', 'Interpreter','latex', 'FontSize',15)
 hold off
 
 
@@ -118,16 +135,16 @@ v_stall = sqrt(2*W_S*g/(rho_inf*cl_max));
 
 figure
 hold on
-title('Aditional and basic lift distribution ($C_{l_{a}}$, $C_{l_{b}}$) as a function of the longitude y', 'Interpreter','latex', FontSize=16)
-plot(y(1,:), CLa(:,1), 'Color', lilac, LineWidth=1.2)
-plot(y(1,:), CLb(:,1), 'b', LineWidth=1.2)
-plot(y(1,:), cl_max_vec, 'Color', orange, LineWidth=1.2)
-plot(y(1,:), cl_dist, 'Color', green, LineWidth=1.2)
+title('Cl básico y Cl adicional a lo largo de la envergadura', 'Interpreter','latex', 'FontSize',16)
+plot(y(1,:), CLa(:,1), 'Color', lilac, 'LineWidth',1.2)
+plot(y(1,:), CLb(:,1), 'b', 'LineWidth',1.2)
+plot(y(1,:), cl_max_vec, 'Color', orange, 'LineWidth',1.2)
+plot(y(1,:), cl_dist, 'Color', green, 'LineWidth',1.2)
 grid on
 grid minor
-xlabel('Wing y distance', 'Interpreter', 'latex', FontSize=15)
-ylabel('$C_{l}$', 'Interpreter','latex', FontSize=15)
-legend('$C_{la}$', '$C_{lb}$', '$C_{lmax}$', '$C_{l} distribution$', 'Interpreter','latex', FontSize=12')
+xlabel('Distancia y desde la raiz', 'Interpreter', 'latex', 'FontSize',15)
+ylabel('$C_{l}$', 'Interpreter','latex', 'FontSize',15)
+legend('$C_{la}$', '$C_{lb}$', '$C_{lmax}$', '$ distribucion C_{l} $', 'Interpreter','latex', 'FontSize',12')
 hold off
 
 %% Calculate CD0 of all wing+fuselage
@@ -136,22 +153,40 @@ CD0_f = C_D0_adim; % drag coefficient of the fuselage
 CD0_matrix = CD0_w+CD0_f;
 
 polin_reg = polyfit(Cl_matrix.^2, CD0_matrix, 1); % polar regresion for CD0 of the wing and fuselage
-pfit_CD0= polyval(polin_reg, linspace(-1, 1, 80));
+pfit_CD0 = polyval(polin_reg, linspace(-1, 1, 80));
+
 CD0 = polin_reg(1,2);
 k1 = polin_reg(1,1);
+polin_reg2 = polyfit(Cl_matrix,CD0_matrix,2);
+polin_reg2(2) = 0;
+pfit_CD02 = polyval(polin_reg2, linspace(-1, 1, 80));
+
+polin_reg3 = polyfit(Cl_matrix,CD0_w,2);
+polin_reg3(2) = 0;
+pfit_CD03 = polyval(polin_reg3, linspace(-1, 1, 80));
+
 %k2 = polin_reg(1,2);
+
+%Drag parabolic curve
+  
+disp(polin_reg3)
+disp(polin_reg2)
+
 
 figure
 hold on
-title('Total drag distribution ($C_{D0}$) as a function of lift coefficient', 'Interpreter','latex', FontSize=16)
-plot(Cl_matrix(1,:), CD0_matrix(1,:), 'Color', lilac, LineWidth=1.2)
-plot(linspace(-1, 1, 80), pfit_CD0, 'Color', orange, LineWidth=1.2)
-plot(Cl_matrix(1,:), CD0_matrix(1,:), 'ko', MarkerSize=8)
+title('Distribución del Drag coeficient en funcion del Cl', 'Interpreter','latex', 'FontSize',16)
+plot(linspace(-1, 1, 80), pfit_CD02, 'Color', orange, 'LineWidth',1.2)
+plot(linspace(-1, 1, 80), pfit_CD03, 'Color', blue, 'LineWidth',1.2)
+%plot(Cl_matrix(1,:), CD0_matrix(1,:), 'ko', 'MarkerSize',8)
+%plot(Cl_matrix(1,:), CD0_w(1,:), 'ko', 'MarkerSize',8)
 grid on
 grid minor
-xlabel('$C_L$', 'Interpreter','latex', FontSize=15)
-ylabel('$C_{D0}$', 'Interpreter','latex', FontSize=15)
+legend('Fuselage Drag + Wing Drag','Wing Drag')
+xlabel('$C_L$', 'Interpreter','latex', 'FontSize',15)
+ylabel('$C_{D0}$', 'Interpreter','latex', 'FontSize',15)
 hold off
+xlim([-1 1])
 
 %% CM about the center of mass as a function of lift coefficient
 x_cg = 1.3/(span*mac);
@@ -169,15 +204,15 @@ CL_trim = -mom_cg_lin_reg(1,2)/mom_cg_lin_reg(1,1);
 
 figure
 hold on
-title('Total moment coefficient from the center of mass ($C_{M_{cg}}$) as a function of lift coefficient', 'Interpreter','latex', FontSize=16)
+title('Coeficiente de momento respecto el centro de gravedad en función del $C_L$', 'Interpreter','latex', 'FontSize',15)
 %plot(Cl_matrix(1,:), CM_cg_matrix(1,:), 'Color', green, LineWidth=1.2)
 %plot(Cl_matrix(1,:), CM_cg_matrix(1,:), 'o', MarkerSize=8)
-plot(Cl_matrix(1,:), yfit, 'b', LineWidth=1.2)
+plot(Cl_matrix(1,:), yfit, 'b', 'LineWidth',1.2)
 plot(CL_trim, 0, 'r*')
 grid on
 grid minor
-xlabel('$C_L$', 'Interpreter','latex', FontSize=15)
-ylabel('$C_{M_{cg}}$', 'Interpreter','latex', FontSize=15)
+xlabel('$C_L$', 'Interpreter','latex', 'FontSize',15)
+ylabel('$C_{M_{cg}}$', 'Interpreter','latex', 'FontSize',15)
 hold off
 
 
@@ -192,12 +227,12 @@ L_D = CL_mat./CD_mat;
 
 figure
 hold on
-title('Lift-Frag ratio ($L/D$) as a function of flight velocity', 'Interpreter','latex', FontSize=16)
-plot(v_matrix(1,:), L_D(1,:), 'b', LineWidth=1.2)
+title('Lift-Frag ratio ($L/D$) as a function of flight velocity', 'Interpreter','latex', 'FontSize',16)
+plot(v_matrix(1,:), L_D(1,:), 'b', 'LineWidth',1.2)
 grid on
 grid minor
-xlabel('$v [m/s]$', 'Interpreter','latex', FontSize=15)
-ylabel('$\frac{L}{D}$', 'Interpreter','latex', FontSize=15)
+xlabel('$v [m/s]$', 'Interpreter','latex', 'FontSize',15)
+ylabel('$\frac{L}{D}$', 'Interpreter','latex', 'FontSize',15)
 hold off
 
 end

@@ -45,10 +45,10 @@ orange = sscanf(str4(2:end),'%2x%2x%2x',[1 3])/255;
 
 figure
 hold on
-title('Fuselage pitching moment coefficient as a function of $\alpha$', 'interpreter', 'latex', FontSize=16)
-plot(alpha_vec_deg, C_MF_adim, 'Color', green, LineWidth=1.2)
-xlabel('alpha [deg.]', Interpreter='latex', FontSize=15)
-ylabel('Fuselage pitching moment coefficient ($C_{MF}$)', 'Interpreter','latex', FontSize=15)
+title('Fuselage pitching moment coefficient as a function of $\alpha$', 'interpreter', 'latex', 'FontSize',16)
+plot(alpha_vec_deg, C_MF_adim, 'Color', green, 'LineWidth',1.2)
+xlabel('alpha ', 'Interpreter','latex', 'FontSize',15)
+ylabel('Fuselage pitching moment coefficient ($C_{MF}$)', 'Interpreter','latex', 'FontSize',15)
 grid on
 grid minor
 axis padded
@@ -76,10 +76,10 @@ end
 
 figure
 hold on
-title('Fuselage parasitic drag coefficient as a function of $\alpha$', 'interpreter', 'latex', FontSize=16)
-plot(alpha_vec_deg, C_Dp(1,:), 'Color', orange, LineWidth=1.2)
-xlabel('alpha [deg.]', Interpreter='latex', FontSize=15)
-ylabel('Fuselage parasitic drag coefficient ($C_{D0}$)', 'Interpreter','latex', FontSize=15)
+title('Fuselage parasitic drag coefficient as a function of $\alpha$', 'interpreter', 'latex', 'FontSize',16)
+plot(alpha_vec_deg, C_Dp(1,:), 'Color', orange, 'LineWidth',1.2)
+xlabel('alpha [deg.]', 'Interpreter','latex', 'FontSize',15)
+ylabel('Fuselage parasitic drag coefficient ($C_{D0}$)', 'Interpreter','latex', 'FontSize',15)
 grid on
 grid minor
 axis padded
